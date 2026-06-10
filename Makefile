@@ -105,6 +105,11 @@ install-dev: ## Install project in development mode
 	$(DOCKER_COMPOSE_DEV) exec -T backend php bin/console assets:install --symlink --relative
 	@echo "$(YELLOW)  • Installing npm dependencies (frontend)...$(NC)"
 	$(DOCKER_COMPOSE_DEV) exec -T frontend npm install
+	@echo "$(YELLOW)  • Loading applications...$(NC)"
+	$(DOCKER_COMPOSE_DEV) exec -T backend php bin/console app:load-applications
+	@echo "$(YELLOW)  • Syncing AMS data...$(NC)"
+	$(DOCKER_COMPOSE_DEV) exec -T backend php bin/console app:sync-ams || \
+		(echo "$(YELLOW)  ⚠ AMS sync failed — check AMS credentials$(NC)")
 	@echo "$(GREEN)✓ Installation completed!$(NC)"
 	@echo ""
 	@echo "$(GREEN)Available services:$(NC)"
@@ -143,6 +148,11 @@ install-prod: ## Install project in production mode
 	@echo "$(YELLOW)  • Building frontend (optimized)...$(NC)"
 	$(DOCKER_COMPOSE_PROD) exec -T frontend npm ci
 	$(DOCKER_COMPOSE_PROD) exec -T frontend npm run build
+	@echo "$(YELLOW)  • Loading applications...$(NC)"
+	$(DOCKER_COMPOSE_PROD) exec -T backend php bin/console app:load-applications
+	@echo "$(YELLOW)  • Syncing AMS data...$(NC)"
+	$(DOCKER_COMPOSE_PROD) exec -T backend php bin/console app:sync-ams || \
+		(echo "$(YELLOW)  ⚠ AMS sync failed — check AMS credentials$(NC)")
 	@echo "$(GREEN)✓ Production installation completed!$(NC)"
 	@echo ""
 	@echo "$(GREEN)Available services:$(NC)"
@@ -176,6 +186,11 @@ install-staging: ## Install project in staging mode (first-time setup on staging
 	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console cache:clear --env=prod
 	@echo "$(YELLOW)  • Installing assets (CSS/JS)...$(NC)"
 	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console assets:install
+	@echo "$(YELLOW)  • Loading applications...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console app:load-applications
+	@echo "$(YELLOW)  • Syncing AMS data...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console app:sync-ams || \
+		(echo "$(YELLOW)  ⚠ AMS sync failed — check AMS credentials in .env.staging$(NC)")
 	@echo "$(GREEN)✓ Staging installation completed!$(NC)"
 	@echo ""
 	@echo "$(GREEN)  • App : $(YELLOW)https://staging-ihub.wingleetdev.com$(NC)"
