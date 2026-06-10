@@ -34,6 +34,10 @@ RUN npm ci
 # Copy source files
 COPY . .
 
+# Accept VITE_* build args so they get baked into the bundle
+ARG VITE_API_URL=http://localhost
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the application
 RUN npm run build
 

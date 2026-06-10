@@ -54,9 +54,9 @@ services:
   frontend:
     build:
       target: production
+      args:
+        - VITE_API_URL=${VITE_API_URL:-https://staging-ihub.wingleetdev.com}
     container_name: ams-apps-hub-frontend
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-https://staging-ihub.wingleetdev.com}
     expose:
       - "80"
     restart: unless-stopped
