@@ -1,4 +1,4 @@
-.PHONY: help install install-dev install-prod update update-dev update-prod start start-prod stop stop-prod restart restart-prod logs logs-prod logs-backend logs-backend-prod logs-frontend logs-frontend-prod logs-database logs-database-prod sync-ams sync-ams-prod fixtures-dev fixtures-prod assets-install assets-install-prod cli-backend cli-backend-prod admin-user admin-user-prod quick-setup quick-setup-prod build-dev build-prod ps ps-prod clean clean-prod clean-all clean-all-prod
+.PHONY: help install install-dev install-prod update update-dev update-prod start start-prod stop stop-prod restart restart-prod logs logs-prod logs-backend logs-backend-prod logs-frontend logs-frontend-prod logs-database logs-database-prod sync-ams sync-ams-prod fixtures-dev fixtures-prod assets-install assets-install-prod cli-backend cli-backend-prod admin-user admin-user-prod quick-setup quick-setup-prod build-dev build-prod ps ps-prod clean clean-prod clean-all clean-all-prod install-staging
 
 # Variables
 DOCKER_COMPOSE := docker compose
@@ -24,7 +24,8 @@ help: ## Display help
 	@echo "$(GREEN)INSTALLATION$(NC)"
 	@echo "  $(YELLOW)make install-dev$(NC)          Install project in development mode"
 	@echo "  $(YELLOW)make install-prod$(NC)         Install project in production mode"
-	@echo "  $(YELLOW)make install$(NC)              Alias for install-dev"
+	@echo "  $(YELLOW)make install$(NC)              Alias for install-dev
+	@echo "  $(YELLOW)make install-staging$(NC)      Install project in staging mode"
 	@echo ""
 	@echo "$(GREEN)UPDATES$(NC)"
 	@echo "  $(YELLOW)make update-dev$(NC)           Update project in development mode"
@@ -161,6 +162,23 @@ install-prod: ## Install project in production mode
 		echo "  • Backend API : $(YELLOW)http://localhost/api$(NC)"; \
 		echo "  • EasyAdmin : $(YELLOW)http://localhost/admin$(NC)"; \
 	fi
+
+install-staging: ## Install project in staging mode (first-time setup on staging server)
+	@echo "$(GREEN)▶ Installing project in staging mode...$(NC)"
+	@[ -f .env.staging ] || (echo "$(RED)✗ .env.staging not found. Copy .env.staging.example and fill it in.$(NC)"; exit 1)
+	@echo "$(YELLOW)  • Starting containers (staging)...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) up -d --build
+	@echo "$(YELLOW)  • Waiting for database startup...$(NC)"
+	sleep 10
+	@echo "$(YELLOW)  • Running migrations...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console doctrine:migrations:migrate --no-interaction
+	@echo "$(YELLOW)  • Clearing cache and warmup...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console cache:clear --env=prod
+	@echo "$(YELLOW)  • Installing assets (CSS/JS)...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console assets:install
+	@echo "$(GREEN)✓ Staging installation completed!$(NC)"
+	@echo ""
+	@echo "$(GREEN)  • App : $(YELLOW)https://staging-ihub.wingleetdev.com$(NC)"
 
 install: install-dev ## Alias for install-dev
 
