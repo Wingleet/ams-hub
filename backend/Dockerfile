@@ -64,6 +64,9 @@ FROM base AS production
 # Optimize PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+# Increase PHP memory limit for CLI commands (sync, migrations, etc.)
+RUN echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/memory.ini
+
 # Configure OPcache
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini && \
     echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache.ini && \
