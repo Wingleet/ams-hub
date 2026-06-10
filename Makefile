@@ -186,8 +186,6 @@ install-staging: ## Install project in staging mode (first-time setup on staging
 	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console cache:clear --env=prod
 	@echo "$(YELLOW)  • Installing assets (CSS/JS)...$(NC)"
 	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console assets:install
-	@echo "$(YELLOW)  • Syncing bundle assets to host mount...$(NC)"
-	docker cp ams-apps-hub-backend:/var/www/backend/public/bundles ./backend/public/ 2>/dev/null || true
 	@echo "$(YELLOW)  • Loading applications...$(NC)"
 	$(DOCKER_COMPOSE_STAGING) exec -T backend php bin/console app:load-applications
 	@echo "$(YELLOW)  • Syncing AMS data...$(NC)"

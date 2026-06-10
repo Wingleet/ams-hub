@@ -41,6 +41,7 @@ services:
       SSO_CALLBACK_URL: ${SSO_CALLBACK_URL:-https://staging-ihub.wingleetdev.com/auth/callback}
     volumes:
       - backend_var:/var/www/backend/var
+      - backend_public:/var/www/backend/public
     restart: unless-stopped
     logging:
       driver: json-file
@@ -79,7 +80,7 @@ services:
     container_name: ams-apps-hub-caddy
     volumes:
       - ./Caddyfile.staging:/etc/caddy/Caddyfile:ro
-      - ./backend:/var/www/backend:ro
+      - backend_public:/var/www/backend/public:ro
       - caddy_data:/data
       - caddy_config:/config
     # Remove the host port bindings from the base compose
@@ -113,5 +114,6 @@ networks:
 volumes:
   postgres_data:
   backend_var:
+  backend_public:
   caddy_data:
   caddy_config:
