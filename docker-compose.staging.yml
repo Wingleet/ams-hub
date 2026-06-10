@@ -67,21 +67,8 @@ services:
         max-file: "3"
 
   # ---------------------------------------------------------------------------
-  # SSO App - Node.js Express (no host port exposed)
+
   # ---------------------------------------------------------------------------
-  sso_app:
-    container_name: ams-apps-hub-sso-app
-    environment:
-      NODE_ENV: production
-      SSO_HUB_URL: ${SSO_HUB_URL:-http://ams-apps-hub-caddy}
-    expose:
-      - "3000"
-    restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   # ---------------------------------------------------------------------------
   # Caddy - Internal reverse proxy
