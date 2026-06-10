@@ -2,35 +2,37 @@
 # TLS and public access handled by the global Caddy proxy
 # Container is reachable inside the `proxy` network as ams-apps-hub-caddy:80
 
+# ── PHP backend snippets (top-level) ────────────────────────────────────────
+
+# PHP-FPM FastCGI helper
+(php_backend) {
+	root * /var/www/backend/public
+	try_files {path} /index.php
+	php_fastcgi backend:9000 {
+		root /var/www/backend/public
+		index index.php
+	}
+}
+
+# PHP-FPM with forwarded headers (EasyAdmin)
+(php_backend_with_headers) {
+	root * /var/www/backend/public
+	try_files {path} /index.php
+	php_fastcgi backend:9000 {
+		root /var/www/backend/public
+		index index.php
+		header_up Host {http.request.header.Host}
+		header_up X-Real-IP {http.request.remote.host}
+		header_up X-Forwarded-For {http.request.remote.host}
+		header_up X-Forwarded-Proto {http.request.scheme}
+		header_up X-Forwarded-Host {http.request.header.Host}
+	}
+}
+
+# ── Server ───────────────────────────────────────────────────────────────────
+
 :80 {
 	encode gzip zstd
-
-	# ── PHP backend snippets ─────────────────────────────────────────────────
-
-	# PHP-FPM FastCGI helper
-	(php_backend) {
-		root * /var/www/backend/public
-		try_files {path} /index.php
-		php_fastcgi backend:9000 {
-			root /var/www/backend/public
-			index index.php
-		}
-	}
-
-	# PHP-FPM with forwarded headers (EasyAdmin)
-	(php_backend_with_headers) {
-		root * /var/www/backend/public
-		try_files {path} /index.php
-		php_fastcgi backend:9000 {
-			root /var/www/backend/public
-			index index.php
-			header_up Host {http.request.header.Host}
-			header_up X-Real-IP {http.request.remote.host}
-			header_up X-Forwarded-For {http.request.remote.host}
-			header_up X-Forwarded-Proto {http.request.scheme}
-			header_up X-Forwarded-Host {http.request.header.Host}
-		}
-	}
 
 	# ── Routes ───────────────────────────────────────────────────────────────
 
