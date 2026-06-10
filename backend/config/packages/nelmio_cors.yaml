@@ -2,8 +2,8 @@ nelmio_cors:
     defaults:
         origin_regex: true
         allow_origin:
-            - "^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
-            - "%env(CORS_ALLOW_ORIGIN)%"
+            - '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+            - '%env(CORS_ALLOW_ORIGIN)%'
         allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
         allow_headers: ["Content-Type", "Authorization", "X-Requested-With"]
         expose_headers:
@@ -14,8 +14,8 @@ nelmio_cors:
         "^/api":
             origin_regex: true
             allow_origin:
-                - "^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
-                - "%env(CORS_ALLOW_ORIGIN)%"
+                - '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+                - '%env(CORS_ALLOW_ORIGIN)%'
             allow_credentials: true
             allow_headers:
                 ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
@@ -23,4 +23,3 @@ nelmio_cors:
             expose_headers:
                 ["Content-Range", "X-Content-Range", "Link", "Set-Cookie"]
             max_age: 3600
-
