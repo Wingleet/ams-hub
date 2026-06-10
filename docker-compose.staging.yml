@@ -1,0 +1,130 @@
+# =============================================================================
+# AMS Apps Hub - Staging Environment
+# =============================================================================
+# Behind the global Caddy reverse proxy on the host (network: proxy).
+# TLS / public ports (:80, :443) are handled by the global proxy — this stack
+# binds NO host ports.
+#
+# Usage on the staging server:
+#   make deploy-staging          # git pull + build + start (detached)
+#   make staging-rebuild         # rebuild images + restart
+#   make staging-restart         # restart without rebuild
+#   make staging-down            # stop containers
+#
+# Required: .env.staging  (copy from .env.staging.example)
+# Required external network: `proxy` (created by the global caddy-proxy stack)
+
+services:
+  # ---------------------------------------------------------------------------
+  # Database - PostgreSQL (no host port exposed)
+  # ---------------------------------------------------------------------------
+  database:
+    container_name: ams-apps-hub-database
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Backend - Symfony (PHP-FPM) — production build target
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      target: production
+    container_name: ams-apps-hub-backend
+    environment:
+      APP_ENV: prod
+      DEFAULT_URI: ${DEFAULT_URI:-https://staging-ihub.wingleetdev.com}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https://staging-ihub\.wingleetdev\.com$}
+      SSO_CALLBACK_URL: ${SSO_CALLBACK_URL:-https://staging-ihub.wingleetdev.com/auth/callback}
+    volumes:
+      - backend_var:/var/www/backend/var
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Frontend - React (production build, served by internal Caddy on :80)
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      target: production
+    container_name: ams-apps-hub-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-https://staging-ihub.wingleetdev.com}
+    expose:
+      - "80"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # SSO App - Node.js Express (no host port exposed)
+  # ---------------------------------------------------------------------------
+  sso_app:
+    container_name: ams-apps-hub-sso-app
+    environment:
+      NODE_ENV: production
+      SSO_HUB_URL: ${SSO_HUB_URL:-http://ams-apps-hub-caddy}
+    expose:
+      - "3000"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Caddy - Internal reverse proxy
+  # Reachable from the global proxy network as ams-apps-hub-caddy:80.
+  # Does NOT bind host ports — TLS handled upstream.
+  # ---------------------------------------------------------------------------
+  caddy:
+    container_name: ams-apps-hub-caddy
+    volumes:
+      - ./Caddyfile.staging:/etc/caddy/Caddyfile:ro
+      - ./backend:/var/www/backend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    # Remove the host port bindings from the base compose
+    ports: !reset []
+    expose:
+      - "80"
+    environment:
+      DOMAIN: ":80"
+    networks:
+      - ams-apps-hub-network
+      - proxy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  ams-apps-hub-network:
+    driver: bridge
+  proxy:
+    external: true
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+  backend_var:
+  caddy_data:
+  caddy_config:

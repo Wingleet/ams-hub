@@ -499,3 +499,69 @@ clean-all-prod: ## ⚠️  Delete production containers AND data
 # ════════════════════════════════════════════════════════════════════════════════
 
 .DEFAULT_GOAL := help
+# ════════════════════════════════════════════════════════════════════════════════
+# STAGING
+# ════════════════════════════════════════════════════════════════════════════════
+
+DOCKER_COMPOSE_STAGING := docker compose -f docker-compose.yml -f docker-compose.staging.yml --env-file .env.staging
+
+.PHONY: deploy-staging staging-rebuild staging-restart staging-down staging-logs staging-status staging-shell staging-migrate staging-quick-setup
+
+deploy-staging: ## git pull + build images + start in staging mode
+	@echo "$(GREEN)▶ Deploying staging (ams-hub)...$(NC)"
+	@[ -f .env.staging ] || (echo "$(RED)✗ .env.staging not found. Copy .env.staging.example and fill it in.$(NC)"; exit 1)
+	@echo "$(YELLOW)  • Pulling latest code...$(NC)"
+	git pull
+	@echo "$(YELLOW)  • Building and starting containers...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) up -d --build
+	@echo "$(YELLOW)  • Waiting for database...$(NC)"
+	sleep 10
+	@echo "$(YELLOW)  • Running migrations...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console doctrine:migrations:migrate --no-interaction
+	@echo "$(YELLOW)  • Clearing cache...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console cache:clear --env=prod
+	@echo "$(YELLOW)  • Installing assets...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console assets:install
+	@echo "$(GREEN)✓ Staging deployment complete! → https://staging-ihub.wingleetdev.com$(NC)"
+
+staging-rebuild: ## Rebuild staging images + restart
+	@echo "$(GREEN)▶ Rebuilding staging images...$(NC)"
+	@[ -f .env.staging ] || (echo "$(RED)✗ .env.staging not found.$(NC)"; exit 1)
+	$(DOCKER_COMPOSE_STAGING) up -d --build --force-recreate
+	@echo "$(GREEN)✓ Staging containers rebuilt and restarted!$(NC)"
+
+staging-restart: ## Restart staging containers without rebuild
+	@echo "$(GREEN)▶ Restarting staging containers...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) restart
+	@echo "$(GREEN)✓ Staging containers restarted!$(NC)"
+
+staging-down: ## Stop staging containers
+	@echo "$(YELLOW)▶ Stopping staging containers...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) down
+	@echo "$(GREEN)✓ Staging containers stopped!$(NC)"
+
+staging-logs: ## View staging logs (Ctrl+C to quit)
+	@echo "$(BLUE)Staging logs ($(YELLOW)Ctrl+C to quit$(BLUE))...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) logs -f
+
+staging-status: ## Display staging container status
+	@echo "$(BLUE)Staging container status:$(NC)"
+	@$(DOCKER_COMPOSE_STAGING) ps
+
+staging-shell: ## Open shell in staging backend container
+	@echo "$(BLUE)Connecting to staging backend...$(NC)"
+	@$(DOCKER_COMPOSE_STAGING) exec $(BACKEND_SERVICE) sh
+
+staging-migrate: ## Run DB migrations in staging
+	@echo "$(GREEN)▶ Running migrations (staging)...$(NC)"
+	$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console doctrine:migrations:migrate --no-interaction
+	@echo "$(GREEN)✓ Migrations applied!$(NC)"
+
+staging-quick-setup: ## Create admin + load apps + sync AMS (staging)
+	@echo "$(GREEN)▶ Quick setup (staging)...$(NC)"
+	@$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console app:create-user admin@test.com Admin Admin password123 --admin || \
+		(echo "$(YELLOW)⚠ Admin user may already exist, continuing...$(NC)")
+	@$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console app:load-applications
+	@$(DOCKER_COMPOSE_STAGING) exec -T $(BACKEND_SERVICE) php bin/console app:sync-ams || \
+		(echo "$(YELLOW)⚠ AMS sync failed — check credentials in .env.staging$(NC)")
+	@echo "$(GREEN)✓ Staging quick setup complete!$(NC)"

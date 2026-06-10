@@ -1,0 +1,84 @@
+# Caddyfile.staging - Internal routing only (HTTP)
+# TLS and public access handled by the global Caddy proxy
+# Container is reachable inside the `proxy` network as ams-apps-hub-caddy:80
+
+:80 {
+	encode gzip zstd
+
+	# ── PHP backend snippets ─────────────────────────────────────────────────
+
+	# PHP-FPM FastCGI helper
+	(php_backend) {
+		root * /var/www/backend/public
+		try_files {path} /index.php
+		php_fastcgi backend:9000 {
+			root /var/www/backend/public
+			index index.php
+		}
+	}
+
+	# PHP-FPM with forwarded headers (EasyAdmin)
+	(php_backend_with_headers) {
+		root * /var/www/backend/public
+		try_files {path} /index.php
+		php_fastcgi backend:9000 {
+			root /var/www/backend/public
+			index index.php
+			header_up Host {http.request.header.Host}
+			header_up X-Real-IP {http.request.remote.host}
+			header_up X-Forwarded-For {http.request.remote.host}
+			header_up X-Forwarded-Proto {http.request.scheme}
+			header_up X-Forwarded-Host {http.request.header.Host}
+		}
+	}
+
+	# ── Routes ───────────────────────────────────────────────────────────────
+
+	# SSO endpoints (Symfony)
+	@sso {
+		path /sso /sso/*
+	}
+	handle @sso {
+		import php_backend
+	}
+
+	# API (Symfony)
+	@api {
+		path /api /api/*
+	}
+	handle @api {
+		import php_backend
+	}
+
+	# Symfony bundles (static assets)
+	@bundles {
+		path /bundles/*
+	}
+	handle @bundles {
+		root * /var/www/backend/public
+		file_server
+	}
+
+	# EasyAdmin
+	@easyadmin {
+		path /admin /admin/*
+	}
+	handle @easyadmin {
+		import php_backend_with_headers
+	}
+
+	# Health check
+	handle /health {
+		respond "OK" 200
+	}
+
+	# Frontend (React SPA) - production container serves on :80
+	handle {
+		reverse_proxy frontend:80
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
