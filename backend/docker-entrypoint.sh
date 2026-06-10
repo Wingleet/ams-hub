@@ -10,6 +10,11 @@ echo "${BLUE}=====================================${NC}"
 echo "${BLUE}Symfony Application Initialization${NC}"
 echo "${BLUE}=====================================${NC}"
 
+# Create a stub .env so Symfony bootEnv() never crashes when the file is
+# absent (backend/.env is gitignored). The value is read from the container
+# APP_ENV env var injected by Docker Compose, so it works for all envs.
+printf "APP_ENV=%s\nAPP_DEBUG=%s\n" "${APP_ENV:-dev}" "${APP_DEBUG:-1}" > /var/www/backend/.env
+
 # First run: install dependencies and warm up cache
 if [ ! -f /var/www/backend/var/.initialized ]; then
     echo "${BLUE}First run: initializing application...${NC}"

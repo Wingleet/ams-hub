@@ -39,6 +39,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 RUN mkdir -p /var/www/backend/var && \
     chown -R www-data:www-data /var/www/backend/var
 
+
 # Copy and setup entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
