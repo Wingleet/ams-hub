@@ -1,0 +1,8 @@
+services:
+    Doctrine\ORM\EntityManagerInterface:
+        alias: doctrine.orm.entity_manager
+        public: true
+
+    Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface:
+        alias: security.user_password_hasher
+        public: true

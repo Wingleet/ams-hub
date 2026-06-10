@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSO Authentication...</title>
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+      .loading-container {
+        text-align: center;
+        padding: 50px;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-container {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .error-container.show {
+        display: block;
+      }
+
+      .btn-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .btn-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="auth-box">
+        <!-- Loading state -->
+        <div id="loadingState" class="loading-container">
+          <div class="spinner"></div>
+          <h2>Authentication in progress...</h2>
+          <p>Please wait while we verify your credentials.</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="error-container">
+          <h2>❌ Authentication error</h2>
+          <p id="errorMessage" class="error-message"></p>
+          <a href="/login.html" class="btn">Back to login</a>
+          <br />
+          <a href="#" id="retryLink" class="btn-link">Retry</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Get the code from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+
+      const loadingState = document.getElementById("loadingState");
+      const errorState = document.getElementById("errorState");
+      const errorMessage = document.getElementById("errorMessage");
+      const retryLink = document.getElementById("retryLink");
+
+      // Function to display an error
+      function showError(message) {
+        loadingState.style.display = "none";
+        errorState.classList.add("show");
+        errorMessage.textContent = message;
+      }
+
+      // Function to verify the SSO code
+      async function verifySSOCode() {
+        if (!code) {
+          showError("No SSO code provided. Invalid redirect from Hub.");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/auth/sso", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ code: code }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            // Store the JWT token in localStorage
+            if (data.token) {
+              localStorage.setItem("token", data.token);
+            }
+            // Successful login - redirect to home page
+            window.location.href = data.redirect || "/home.html";
+          } else {
+            // Display the error
+            showError(data.error || "Error during SSO authentication");
+          }
+        } catch (error) {
+          showError("Unable to contact the server. Please try again.");
+        }
+      }
+
+      // Handle the "Retry" click
+      retryLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        errorState.classList.remove("show");
+        loadingState.style.display = "block";
+        verifySSOCode();
+      });
+
+      // Launch verification on page load
+      verifySSOCode();
+    </script>
+  </body>
+</html>

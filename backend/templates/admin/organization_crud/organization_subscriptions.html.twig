@@ -1,0 +1,93 @@
+{% set organization = field.formattedValue %}
+{% set organizationId = organization.id %}
+{% set subscriptions = organization.subscriptions %}
+
+<div class="mb-4 text-end">
+    <a href="/admin?crudAction=new&crudControllerFqcn=App%5CController%5CAdmin%5COrganizationSubscriptionCrudController&orgId={{ organizationId }}" 
+        class="btn btn-primary">
+        <i class="fa fa-plus"></i> Add New Subscription
+    </a>
+</div>
+
+{% if subscriptions is not empty %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Application</th>
+                    <th>Status</th>
+                    <th>Expires At</th>
+                    <th>Created At</th>
+                    <th style="width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subscription in subscriptions %}
+                    <tr>
+                        <td>{{ subscription.id }}</td>
+                        <td>
+                            {% if subscription.application %}
+                                <strong>{{ subscription.application.name }}</strong>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if subscription.isActive %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if subscription.endsAt %}
+                                {{ subscription.endsAt|date('d/m/Y H:i') }}
+                            {% else %}
+                                <span class="badge bg-gray-100 p-2">No expiration</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ subscription.createdAt ? subscription.createdAt|date('d/m/Y H:i') : '' }}</td>
+                        <td class="text-nowrap">
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Subscription actions">
+                                <a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\OrganizationSubscriptionCrudController')
+                                    .setAction('detail')
+                                    .setEntityId(subscription.id)
+                                    .set('orgId', organizationId) }}" 
+                                    class="btn btn-outline-info" 
+                                    title="View Details"
+                                    data-bs-toggle="tooltip">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                <a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\OrganizationSubscriptionCrudController')
+                                    .setAction('edit')
+                                    .setEntityId(subscription.id)
+                                    .set('orgId', organizationId) }}" 
+                                    class="btn btn-outline-warning" 
+                                    title="Edit Subscription"
+                                    data-bs-toggle="tooltip">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <form method="POST" 
+                                    action="{{ path('delete_organization_subscription', {'organizationId': organizationId, 'subscriptionId': subscription.id}) }}" 
+                                    style="display: inline;" 
+                                    onsubmit="return confirm('⚠️ Are you sure you want to delete this subscription? This action cannot be undone.');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_subscription_' ~ subscription.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger" title="Delete Subscription" data-bs-toggle="tooltip">
+                                        <i class="fa fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="fa fa-info-circle"></i> No subscriptions found for this organization.
+    </div>
+{% endif %}

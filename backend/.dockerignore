@@ -1,0 +1,9 @@
+# Backend .dockerignore
+var/
+vendor/
+.env.local
+.env.*.local
+.git/
+.gitignore
+tests/
+.phpunit.result.cache

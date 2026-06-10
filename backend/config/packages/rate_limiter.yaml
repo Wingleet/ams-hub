@@ -1,0 +1,25 @@
+framework:
+    rate_limiter:
+        # Global limit for the API
+        api_limiter:
+            policy: "sliding_window"
+            limit: 100
+            interval: "1 hour"
+            cache_pool: "cache.rate_limiter"
+            lock_factory: "lock.default.factory"
+
+        # Strict limiter for authentication (brute force protection)
+        login_limiter:
+            policy: "sliding_window"
+            limit: 5
+            interval: "15 minutes"
+            cache_pool: "cache.rate_limiter"
+            lock_factory: "lock.default.factory"
+
+        # Limiter for sensitive endpoints
+        sensitive_limiter:
+            policy: "sliding_window"
+            limit: 20
+            interval: "1 hour"
+            cache_pool: "cache.rate_limiter"
+            lock_factory: "lock.default.factory"

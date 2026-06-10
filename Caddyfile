@@ -1,0 +1,111 @@
+# Caddyfile - Unified Reverse Proxy for AMS APPS HUB
+#
+# Usage:
+#   - Local dev: DOMAIN=:80 (default, HTTP only)
+#   - Production: DOMAIN=your-domain.com (automatic HTTPS)
+#
+# Access points:
+#   - /          → Frontend
+#   - /admin     → EasyAdmin (Backend)
+#   - /api       → Backend API
+#   - /api/docs  → API Documentation
+
+# ============================================================
+# SNIPPETS - Reusable configuration blocks
+# ============================================================
+
+# PHP-FPM backend configuration
+(php_backend) {
+	root * /var/www/backend/public
+	try_files {path} /index.php
+	php_fastcgi backend:9000 {
+		root /var/www/backend/public
+		index index.php
+	}
+}
+
+# PHP-FPM backend with forwarded headers (for EasyAdmin)
+(php_backend_with_headers) {
+	root * /var/www/backend/public
+	try_files {path} /index.php
+	php_fastcgi backend:9000 {
+		root /var/www/backend/public
+		index index.php
+		header_up Host {http.request.header.Host}
+		header_up X-Real-IP {http.request.remote.host}
+		header_up X-Forwarded-For {http.request.remote.host}
+		header_up X-Forwarded-Proto {http.request.scheme}
+		header_up X-Forwarded-Host {http.request.header.Host}
+	}
+}
+
+# Common route handlers
+(common_routes) {
+	# SSO Endpoints - Backend (Symfony)
+	@sso {
+		path /sso /sso/*
+	}
+	handle @sso {
+		import php_backend
+	}
+
+	# API Backend - Symfony (FastCGI vers PHP-FPM)
+	@api {
+		path /api /api/*
+	}
+	handle @api {
+		import php_backend
+	}
+
+	# Symfony Profiler & Debug Toolbar
+	@symfony_debug {
+		path /_profiler/*
+		path /_wdt/*
+	}
+	handle @symfony_debug {
+		import php_backend
+	}
+
+	# Symfony bundles (assets)
+	@bundles {
+		path /bundles/*
+	}
+	handle @bundles {
+		root * /var/www/backend/public
+		file_server
+	}
+
+	# EasyAdmin Backend - routes /admin and /admin/*
+	@easyadmin {
+		path /admin /admin/*
+	}
+	handle @easyadmin {
+		import php_backend_with_headers
+	}
+
+	# Frontend (default) - with WebSocket support for HMR
+	handle {
+		reverse_proxy frontend:5173
+	}
+
+	# Logging
+	log {
+		output stdout
+		format console
+	}
+}
+
+# ============================================================
+# SERVER CONFIGURATION
+# ============================================================
+
+# Primary server - Domain from environment variable or fallback to :80
+{$DOMAIN::80} {
+	import common_routes
+}
+
+# Internal Docker network access (for SSO inter-service communication)
+# Only active when DOMAIN is not :80
+http://caddy {
+	import common_routes
+}

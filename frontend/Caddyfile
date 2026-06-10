@@ -1,0 +1,31 @@
+# Caddyfile for React/Vite Frontend
+:80 {
+    root * /usr/share/caddy
+    
+    # SPA routing - try files, fallback to index.html
+    try_files {path} /index.html
+    
+    # Enable compression
+    encode gzip
+    
+    # Cache static assets
+    @static {
+        path *.jpg *.jpeg *.png *.gif *.ico *.css *.js *.svg *.woff *.woff2 *.ttf *.eot
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    
+    # Security headers
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+    }
+    
+    # Logging
+    log {
+        output stdout
+        format console
+    }
+    
+    file_server
+}

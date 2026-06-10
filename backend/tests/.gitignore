@@ -1,0 +1,8 @@
+# PHPUnit
+.phpunit.cache/
+coverage-report/
+.phpunit.result.cache
+
+# Test databases
+*.db
+*.sqlite

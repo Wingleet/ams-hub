@@ -1,0 +1,7 @@
+{# Surcharge du layout EasyAdmin pour ajouter le favicon #}
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block head_favicon %}
+    <link rel="icon" type="image/jpeg" href="{{ asset('ams_aircraft_management_system_logo.jpeg') }}">
+{% endblock %}
+

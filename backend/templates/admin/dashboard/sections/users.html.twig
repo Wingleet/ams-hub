@@ -1,0 +1,75 @@
+<div class="table-responsive">
+    <table class="table table-vcenter card-table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Organization</th>
+                <th>Roles</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.email }}</td>
+                <td>{{ user.firstname }} {{ user.lastname }}</td>
+                <td>
+                    {% if user.organization %}
+                        <span class="badge bg-blue">{{ user.organization.name }}</span>
+                    {% else %}
+                        <span class="text-muted">None</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% for role in user.roles %}
+                        {% if role == 'ROLE_ADMIN' %}
+                            <span class="badge bg-danger">{{ role }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ role }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if user.isActive %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.lastLoginAt %}
+                        {{ user.lastLoginAt|date('d/m/Y H:i') }}
+                    {% else %}
+                        <span class="text-muted">Never</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.createdAt|date('d/m/Y H:i') }}</td>
+            </tr>
+            {% endfor %}
+            {% if users|length == 0 %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">No users</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% if totalItems > itemsPerPage %}
+<div class="card-footer">
+    <div class="d-flex align-items-center">
+        <p class="text-muted mb-0">Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ (currentPage * itemsPerPage > totalItems) ? totalItems : currentPage * itemsPerPage }} of {{ totalItems }}</p>
+        <div class="ms-auto">
+            {% if currentPage > 1 %}
+                <a href="#" data-section="users" data-page="{{ currentPage - 1 }}" class="btn btn-sm btn-outline-secondary pagination-link">Previous</a>
+            {% endif %}
+            <span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
+            {% if currentPage < totalPages %}
+                <a href="#" data-section="users" data-page="{{ currentPage + 1 }}" class="btn btn-sm btn-outline-secondary pagination-link">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}

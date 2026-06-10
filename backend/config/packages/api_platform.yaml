@@ -1,0 +1,17 @@
+api_platform:
+    title: AMS APPS HUB API
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ["Content-Type", "Authorization", "Origin"]
+    mapping:
+        paths:
+            - "%kernel.project_dir%/src/Entity"
+    # Swagger UI & ReDoc
+    enable_swagger_ui: true
+    enable_re_doc: true
+    enable_docs: true
+    # Swagger configuration
+    swagger:
+        versions: [3]

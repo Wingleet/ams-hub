@@ -1,0 +1,212 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block main %}
+<div class="container-xl">
+    <div class="page-wrapper">
+        <div class="container-xl">
+            <!-- Statistics -->
+            <div class="row row-deck row-cards mb-4">
+                <div class="col-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="h3 mb-0">{{ stats.totalUsers }}</div>
+                                    <div class="text-muted">Total Users</div>
+                                </div>
+                                <div class="ms-auto lh-1">
+                                    <div class="btn-list flex-nowrap">
+                                        <a href="{{ path('admin', {'crudAction': 'index', 'crudControllerFqcn': 'App\\\\Controller\\\\Admin\\\\UserCrudController'}) }}" class="btn btn-icon btn-ghost-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3" /><line x1="12" y1="12" x2="20" y2="7.5" /><line x1="12" y1="12" x2="12" y2="21" /><line x1="12" y1="12" x2="4" y2="7.5" /></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="h3 mb-0">{{ stats.activeUsers }}</div>
+                                    <div class="text-muted">Active Users</div>
+                                </div>
+                                <div class="ms-auto lh-1">
+                                    <div class="btn-list flex-nowrap">
+                                        <a href="{{ path('admin', {'crudAction': 'index', 'crudControllerFqcn': 'App\\\\Controller\\\\Admin\\\\UserCrudController'}) }}" class="btn btn-icon btn-ghost-success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3" /><line x1="12" y1="12" x2="20" y2="7.5" /><line x1="12" y1="12" x2="12" y2="21" /><line x1="12" y1="12" x2="4" y2="7.5" /></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="h3 mb-0">{{ stats.totalOrganizations }}</div>
+                                    <div class="text-muted">Organizations</div>
+                                </div>
+                                <div class="ms-auto lh-1">
+                                    <div class="btn-list flex-nowrap">
+                                        <a href="{{ path('admin', {'crudAction': 'index', 'crudControllerFqcn': 'App\\\\Controller\\\\Admin\\\\OrganizationCrudController'}) }}" class="btn btn-icon btn-ghost-info">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3" /><line x1="12" y1="12" x2="20" y2="7.5" /><line x1="12" y1="12" x2="12" y2="21" /><line x1="12" y1="12" x2="4" y2="7.5" /></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="h3 mb-0">{{ stats.activeApplications }} / {{ stats.totalApplications }}</div>
+                                    <div class="text-muted">Applications (active)</div>
+                                </div>
+                                <div class="ms-auto lh-1">
+                                    <div class="btn-list flex-nowrap">
+                                        <a href="{{ path('admin', {'crudAction': 'index', 'crudControllerFqcn': 'App\\\\Controller\\\\Admin\\\\ApplicationCrudController'}) }}" class="btn btn-icon btn-ghost-warning">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3" /><line x1="12" y1="12" x2="20" y2="7.5" /><line x1="12" y1="12" x2="12" y2="21" /><line x1="12" y1="12" x2="4" y2="7.5" /></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="h3 mb-0">{{ totalSubscriptions }}</div>
+                                    <div class="text-muted">Subscriptions</div>
+                                </div>
+                                <div class="ms-auto lh-1">
+                                    <div class="btn-list flex-nowrap">
+                                        <a href="{{ path('admin', {'crudAction': 'index', 'crudControllerFqcn': 'App\\\\Controller\\\\Admin\\\\ApplicationCrudController'}) }}" class="btn btn-icon btn-ghost-warning">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3" /><line x1="12" y1="12" x2="20" y2="7.5" /><line x1="12" y1="12" x2="12" y2="21" /><line x1="12" y1="12" x2="4" y2="7.5" /></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organizations and Applications -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Organizations ({{ totalOrganizations }})</h3>
+                        </div>
+                        <div id="organizations-section" data-section="organizations">
+                            {% include 'admin/dashboard/sections/organizations.html.twig' with {
+                                organizations: organizations,
+                                organizationUrls: organizationUrls,
+                                totalItems: totalOrganizations,
+                                currentPage: organizationsPage,
+                                itemsPerPage: itemsPerPage,
+                                totalPages: ((totalOrganizations + itemsPerPage - 1) / itemsPerPage)|round(0, 'floor')
+                            } only %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 pt-md-0 pt-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Applications ({{ totalApplications }})</h3>
+                        </div>
+                        <div id="applications-section" data-section="applications">
+                            {% include 'admin/dashboard/sections/applications.html.twig' with {
+                                applications: applications,
+                                totalItems: totalApplications,
+                                currentPage: applicationsPage,
+                                itemsPerPage: itemsPerPage,
+                                totalPages: ((totalApplications + itemsPerPage - 1) / itemsPerPage)|round(0, 'floor')
+                            } only %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Activities ({{ totalActivities }})</h3>
+                        </div>
+                        <div id="activities-section" data-section="activities">
+                            {% include 'admin/dashboard/sections/activities.html.twig' with {
+                                activities: activities,
+                                totalItems: totalActivities,
+                                currentPage: activitiesPage,
+                                itemsPerPage: itemsPerPage,
+                                totalPages: ((totalActivities + itemsPerPage - 1) / itemsPerPage)|round(0, 'floor')
+                            } only %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-table {
+        margin-bottom: 0;
+    }
+    .badge {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle pagination links via AJAX
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('pagination-link')) {
+            e.preventDefault();
+            
+            const section = e.target.getAttribute('data-section');
+            const page = e.target.getAttribute('data-page');
+            const sectionElement = document.getElementById(section + '-section');
+            
+            // Add loading state
+            sectionElement.classList.add('loading');
+            
+            // Fetch new content
+            fetch(`{{ path('admin_dashboard_section', {'section': 'SECTION'}) }}`.replace('SECTION', section) + '?page=' + page)
+                .then(response => response.text())
+                .then(html => {
+                    sectionElement.innerHTML = html;
+                    // Scroll to section
+                    sectionElement.closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                })
+                .catch(error => console.error('Error loading section:', error))
+                .finally(() => {
+                    sectionElement.classList.remove('loading');
+                });
+        }
+    });
+});
+</script>
+{% endblock main %}

@@ -1,0 +1,73 @@
+<table class="table card-table table-vcenter">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Entity</th>
+            <th>Message</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if activities %}
+            {% for activity in activities %}
+                <tr>
+                    <td>
+                        {% set typeParts = activity.type|split('_') %}
+                        {% set entityType = typeParts[0] %}
+                        {% set action = typeParts[1] %}
+                        <span class="badge badge-{{ entityType == 'user' ? 'primary' : (entityType == 'org' ? 'info' : (entityType == 'app' ? 'warning' : (entityType == 'sub' ? 'success' : 'secondary'))) }}">
+                            {{ entityType|upper }}
+                        </span>
+                    </td>
+                    <td>{{ activity.entityName }}</td>
+                    <td>{{ activity.message }}</td>
+                    <td>
+                        <small class="text-muted">{{ activity.createdAt }}</small>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No recent activities</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+{% if totalPages > 1 %}
+    <nav class="d-flex align-items-center justify-content-between">
+        <div class="page-info p-2">
+            Page {{ currentPage }} of {{ totalPages }} ({{ totalItems }} activities)
+        </div>
+        <ul class="pagination m-0 ms-auto">
+            {% if currentPage > 1 %}
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="#" data-section="activities" data-page="1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="#" data-section="activities" data-page="{{ currentPage - 1 }}">Prev</a>
+                </li>
+            {% endif %}
+
+            {% for i in 1..totalPages %}
+                {% if i == currentPage %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% elseif i >= currentPage - 2 and i <= currentPage + 2 %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="#" data-section="activities" data-page="{{ i }}">{{ i }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if currentPage < totalPages %}
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="#" data-section="activities" data-page="{{ currentPage + 1 }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="#" data-section="activities" data-page="{{ totalPages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

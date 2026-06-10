@@ -1,0 +1,9 @@
+# Frontend .dockerignore
+node_modules/
+dist/
+.env.local
+.env.*.local
+.git/
+*.log
+coverage/
+.vite/

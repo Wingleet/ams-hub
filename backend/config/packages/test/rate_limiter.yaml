@@ -1,0 +1,19 @@
+framework:
+    rate_limiter:
+        # Global limit for the API
+        api_limiter:
+            policy: "sliding_window"
+            limit: 1000 # Higher limit for tests
+            interval: "1 hour"
+
+        # Strict limiter for authentication (brute force protection)
+        login_limiter:
+            policy: "sliding_window"
+            limit: 50 # Higher limit for tests
+            interval: "15 minutes"
+
+        # Limiter for sensitive endpoints
+        sensitive_limiter:
+            policy: "sliding_window"
+            limit: 200 # Higher limit for tests
+            interval: "1 hour"

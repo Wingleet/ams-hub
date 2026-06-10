@@ -1,0 +1,83 @@
+{% set organization = field.formattedValue %}
+{% set organizationId = organization.id %}
+{% set users = organization.users %}
+
+<div class="mb-4 text-end">
+    <a href="/admin?crudAction=new&crudControllerFqcn=App%5CController%5CAdmin%5COrganizationUserCrudController&orgId={{ organizationId }}" 
+        class="btn btn-primary">
+        <i class="fa fa-plus"></i> Add New User
+    </a>
+</div>
+
+{% if users is not empty %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Active</th>
+                    <th>Created At</th>
+                    <th style="width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.firstname }}</td>
+                        <td>{{ user.lastname }}</td>
+                        <td>
+                            {% if user.isActive %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : '' }}</td>
+                        <td class="text-nowrap">
+                            <div class="btn-group btn-group-sm" role="group" aria-label="User actions">
+                                <a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\OrganizationUserCrudController')
+                                    .setAction('detail')
+                                    .setEntityId(user.id)
+                                    .set('orgId', organizationId) }}" 
+                                    class="btn btn-outline-info" 
+                                    title="View Details"
+                                    data-bs-toggle="tooltip">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                <a href="{{ ea_url()
+                                    .setController('App\\Controller\\Admin\\OrganizationUserCrudController')
+                                    .setAction('edit')
+                                    .setEntityId(user.id)
+                                    .set('orgId', organizationId) }}" 
+                                    class="btn btn-outline-warning" 
+                                    title="Edit User"
+                                    data-bs-toggle="tooltip">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <form method="POST" 
+                                    action="{{ path('delete_organization_user', {'organizationId': organizationId, 'userId': user.id}) }}" 
+                                    style="display: inline;" 
+                                    onsubmit="return confirm('⚠️ Are you sure you want to delete this user? This action cannot be undone.');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger" title="Delete User" data-bs-toggle="tooltip">
+                                        <i class="fa fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="fa fa-info-circle"></i> No users found for this organization.
+    </div>
+{% endif %}

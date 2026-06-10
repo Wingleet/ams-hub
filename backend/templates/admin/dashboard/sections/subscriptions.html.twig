@@ -1,0 +1,69 @@
+<div class="table-responsive">
+    <table class="table table-vcenter card-table">
+        <thead>
+            <tr>
+                <th>Organization</th>
+                <th>Application</th>
+                <th>Status</th>
+                <th></th>
+                <th>End Date</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscriptions %}
+            <tr>
+                <td>
+                    <strong>{{ subscription.organization.name }}</strong>
+                </td>
+                <td>
+                    <strong>{{ subscription.application.name }}</strong>
+                </td>
+                <td>
+                    {% if subscription.isActive %}
+                        {% if subscription.endsAt and subscription.endsAt < "now"|date('Y-m-d') %}
+                            <span class="badge bg-danger">Expired</span>
+                        {% else %}
+                            <span class="badge bg-success">Active</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-warning">Suspended</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="text-muted">-</span>
+                </td>
+                <td>
+                    {% if subscription.endsAt %}
+                        {{ subscription.endsAt|date('d/m/Y') }}
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>{{ subscription.createdAt|date('d/m/Y H:i') }}</td>
+            </tr>
+            {% endfor %}
+            {% if subscriptions|length == 0 %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">No subscriptions</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% if totalItems > itemsPerPage %}
+<div class="card-footer">
+    <div class="d-flex align-items-center">
+        <p class="text-muted mb-0">Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ (currentPage * itemsPerPage > totalItems) ? totalItems : currentPage * itemsPerPage }} of {{ totalItems }}</p>
+        <div class="ms-auto">
+            {% if currentPage > 1 %}
+                <a href="#" data-section="subscriptions" data-page="{{ currentPage - 1 }}" class="btn btn-sm btn-outline-secondary pagination-link">Previous</a>
+            {% endif %}
+            <span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
+            {% if currentPage < totalPages %}
+                <a href="#" data-section="subscriptions" data-page="{{ currentPage + 1 }}" class="btn btn-sm btn-outline-secondary pagination-link">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}

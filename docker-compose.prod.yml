@@ -1,0 +1,108 @@
+services:
+  # Database - PostgreSQL
+  database:
+    image: postgres:16-alpine
+    container_name: ams-apps-hub-database
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ams-apps-hub}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ams-apps-hub-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend - Symfony (PHP-FPM)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: ams-apps-hub-backend
+    environment:
+      APP_ENV: ${APP_ENV:-prod}
+      APP_SECRET: ${APP_SECRET:-changeme}
+      JWT_SECRET: ${JWT_SECRET:-ams-apps-hub-jwt-secret-key-change-in-production}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@database:5432/${POSTGRES_DB:-ams-apps-hub}?serverVersion=16&charset=utf8
+      DEFAULT_URI: ${DEFAULT_URI:-https://localhost}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https?://(localhost)(:[0-9]+)?$}
+      AMS_API_URL: ${AMS_API_URL:-http://api.example.com}
+      AMS_API_DB: ${AMS_API_DB:-APP_NAME}
+      AMS_API_USER: ${AMS_API_USER:-api_user}
+      AMS_API_PASSWORD: ${AMS_API_PASSWORD:-api_password}
+    volumes:
+      - backend_var:/var/www/backend/var
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - ams-apps-hub-network
+    restart: unless-stopped
+
+  # Caddy - Unified reverse proxy (single entry point)
+  caddy:
+    image: caddy:2-alpine
+    container_name: ams-apps-hub-caddy
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./backend:/var/www/backend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
+    networks:
+      - ams-apps-hub-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Frontend - React/Vite (built and served with Caddy)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: ams-apps-hub-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-https://localhost}
+    networks:
+      - ams-apps-hub-network
+    restart: unless-stopped
+
+networks:
+  ams-apps-hub-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  backend_vendor:
+  backend_var:
+  frontend_node_modules:
+  caddy_data:
+  caddy_config:

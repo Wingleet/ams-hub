@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="auth-box">
+        <h1>Registration</h1>
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              required
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="new-password"
+              minlength="6"
+            />
+            <small>Minimum 6 characters</small>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+              autocomplete="new-password"
+            />
+          </div>
+          <div id="errorMessage" class="error-message"></div>
+          <button type="submit" class="btn">Sign up</button>
+        </form>
+        <p class="auth-link">
+          Already have an account? <a href="/login.html">Login</a>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById("registerForm");
+      const errorMessage = document.getElementById("errorMessage");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorMessage.textContent = "";
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        // Validation
+        if (password !== confirmPassword) {
+          errorMessage.textContent = "Passwords do not match";
+          return;
+        }
+
+        if (password.length < 6) {
+          errorMessage.textContent =
+            "Password must contain at least 6 characters";
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Store the JWT token in localStorage
+            if (data.token) {
+              localStorage.setItem("token", data.token);
+            }
+            window.location.href = data.redirect || "/home.html";
+          } else {
+            errorMessage.textContent = data.error || "Registration error";
+          }
+        } catch (error) {
+          errorMessage.textContent = "Server connection error";
+        }
+      });
+    </script>
+  </body>
+</html>

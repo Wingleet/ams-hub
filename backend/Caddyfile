@@ -1,0 +1,31 @@
+# Caddyfile for Symfony Backend
+:80 {
+    root * /var/www/backend/public
+    
+    # Serve static files directly (CSS, JS, images, etc.)
+    handle_path /bundles/* {
+        file_server
+    }
+    
+    # PHP-FPM configuration
+    php_fastcgi backend:9000 {
+        header_up Host {http.request.header.Host}
+        header_up X-Real-IP {http.request.remote.host}
+        header_up X-Forwarded-For {http.request.remote.host}
+        header_up X-Forwarded-Proto {http.request.scheme}
+        header_up X-Forwarded-Host {http.request.header.Host}
+        header_up Origin {http.request.header.Origin}
+    }
+    
+    # Try to serve files directly, fallback to index.php
+    try_files {path} /index.php?{query}
+    
+    # Encode responses
+    encode gzip
+    
+    # Logging
+    log {
+        output stdout
+        format console
+    }
+}

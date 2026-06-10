@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="home-box">
+        <header class="home-header">
+          <h1>Welcome, <span id="username"></span>!</h1>
+          <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+        </header>
+
+        <div class="home-content">
+          <div class="welcome-card">
+            <h2>🎉 You are logged in</h2>
+            <p>
+              This page is protected and accessible only to authenticated users.
+            </p>
+            <div class="user-info">
+              <p><strong>User ID:</strong> <span id="userId"></span></p>
+              <p>
+                <strong>Username:</strong>
+                <span id="usernameInfo"></span>
+              </p>
+              <p>
+                <strong>Authentication method:</strong>
+                <span id="authMethod"></span>
+              </p>
+            </div>
+
+            <!-- SSO Information (displayed only if SSO login) -->
+            <div
+              id="ssoInfo"
+              class="user-info"
+              style="display: none; margin-top: 20px; background: #f0f7ff"
+            >
+              <h3 style="color: #667eea; margin-bottom: 15px">
+                📋 SSO Information
+              </h3>
+              <p><strong>Email:</strong> <span id="ssoEmail"></span></p>
+              <p>
+                <strong>First name:</strong> <span id="ssoFirstname"></span>
+              </p>
+              <p><strong>Last name:</strong> <span id="ssoLastname"></span></p>
+              <p><strong>Role:</strong> <span id="ssoRole"></span></p>
+              <p>
+                <strong>Organization ID:</strong> <span id="ssoOrgId"></span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Get user information
+      async function loadUserInfo() {
+        try {
+          const token = localStorage.getItem("token");
+          const headers = {};
+
+          if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+          }
+
+          const response = await fetch("/api/user", {
+            headers: headers,
+          });
+          if (response.ok) {
+            const user = await response.json();
+            document.getElementById("username").textContent = user.username;
+            document.getElementById("userId").textContent = user.id;
+            document.getElementById("usernameInfo").textContent = user.username;
+            document.getElementById("authMethod").textContent =
+              user.authMethod || "Local";
+
+            // Display SSO information if available
+            if (user.ssoUser) {
+              const ssoInfo = document.getElementById("ssoInfo");
+              ssoInfo.style.display = "block";
+
+              document.getElementById("ssoEmail").textContent =
+                user.ssoUser.email || "N/A";
+              document.getElementById("ssoFirstname").textContent =
+                user.ssoUser.firstname || "N/A";
+              document.getElementById("ssoLastname").textContent =
+                user.ssoUser.lastname || "N/A";
+              document.getElementById("ssoRole").textContent = Array.isArray(
+                user.ssoUser.role,
+              )
+                ? user.ssoUser.role.join(", ")
+                : user.ssoUser.role || "N/A";
+              document.getElementById("ssoOrgId").textContent =
+                user.ssoUser.organization_id || "N/A";
+            }
+          } else {
+            window.location.href = "/login.html";
+          }
+        } catch (error) {
+          window.location.href = "/login.html";
+        }
+      }
+
+      // Logout
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", async () => {
+          try {
+            const response = await fetch("/api/logout", {
+              method: "POST",
+            });
+
+            if (response.ok) {
+              // Clear the token from localStorage
+              localStorage.removeItem("token");
+              window.location.href = "/login.html";
+            }
+          } catch (error) {
+            console.error("Error during logout:", error);
+          }
+        });
+
+      // Load user information on page load
+      loadUserInfo();
+    </script>
+  </body>
+</html>

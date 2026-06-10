@@ -1,0 +1,64 @@
+<div class="table-responsive">
+    <table class="table table-vcenter card-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>URL</th>
+                <th>Status</th>
+                <th>Subscriptions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for application in applications %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        {% if application.iconUrl %}
+                            <img src="{{ application.iconUrl }}" alt="{{ application.name }}" class="avatar avatar-sm me-2" style="max-width: 30px; max-height: 30px; object-fit: contain;">
+                        {% endif %}
+                        <span>{{ application.name }}</span>
+                    </div>
+                </td>
+                <td>
+                    {% if application.url %}
+                        <a href="{{ application.url }}" target="_blank" class="text-truncate">{{ application.url }}</a>
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if application.isActive %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge bg-grey-100">{{ application.subscriptions|length }}</span>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if applications|length == 0 %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No applications</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% if totalItems > itemsPerPage %}
+<div class="card-footer">
+    <div class="d-flex align-items-center">
+        <p class="text-muted mb-0">Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ (currentPage * itemsPerPage > totalItems) ? totalItems : currentPage * itemsPerPage }} of {{ totalItems }}</p>
+        <div class="ms-auto">
+            {% if currentPage > 1 %}
+                <a href="#" data-section="applications" data-page="{{ currentPage - 1 }}" class="btn btn-sm btn-outline-secondary pagination-link">Previous</a>
+            {% endif %}
+            <span class="mx-2">Page {{ currentPage }} of {{ totalPages }}</span>
+            {% if currentPage < totalPages %}
+                <a href="#" data-section="applications" data-page="{{ currentPage + 1 }}" class="btn btn-sm btn-outline-secondary pagination-link">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
