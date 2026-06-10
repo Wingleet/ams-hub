@@ -30,6 +30,10 @@ if [ ! -f /var/www/backend/var/.initialized ]; then
     php bin/console cache:clear --no-warmup
     php bin/console cache:warmup
     
+    # Install Symfony bundle assets (EasyAdmin CSS/JS etc.)
+    echo "${BLUE}Installing Symfony assets...${NC}"
+    php bin/console assets:install --no-interaction > /dev/null 2>&1 || true
+
     # Mark as initialized
     touch /var/www/backend/var/.initialized
     echo "${GREEN}✓ Application dependencies installed${NC}"
