@@ -1,6 +1,6 @@
 # Caddyfile for React/Vite Frontend
 :80 {
-    root * /usr/share/caddy
+    root * /app/dist
     
     # SPA routing - try files, fallback to index.html
     try_files {path} /index.html
